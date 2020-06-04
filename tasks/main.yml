@@ -1,0 +1,35 @@
+---
+
+- name: 'Creating base directories for {{ ghost__blog_name }}'
+  file:
+    path: '{{ item }}'
+    owner: root
+    group: root
+    mode: '755'
+    state: directory
+  loop:
+    - '{{ ghost__base_dir }}'
+    - '{{ ghost__base_dir }}/content'
+
+- name: 'Creating config file for {{ ghost__blog_name }}'
+  template:
+    src: "templates/docker_env.j2"
+    dest: "{{ ghost__base_dir }}/docker_env"
+    owner: root
+    group: root
+    mode: '600'
+
+- name: "Setup ghost's docker container for {{ ghost__blog_name }}"
+  docker_container:
+    name: 'ghost_{{ ghost__host | replace(".", "_") }}'
+    image: 'ghost:{{ ghost__version }}-alpine'
+    env_file: "{{ ghost__base_dir }}/docker_env"
+    mounts:
+      - source: "{{ ghost__base_dir }}/content"
+        target: /var/lib/ghost/content
+        type: bind
+    networks_cli_compatible: yes
+    published_ports:
+      - "{{ ghost__listen_host }}:{{ ghost__listen_port }}:2368/tcp"
+    restart_policy: 'unless-stopped'
+    state: started

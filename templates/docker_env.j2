@@ -1,0 +1,4 @@
+url=https://{{ ghost__host }}
+{% for key, val in ghost__configs.items() %}
+{{ key }}={{ val }}
+{% endfor %}

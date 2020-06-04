@@ -1,0 +1,8 @@
+---
+ghost__version: '3.18.1'
+ghost__base_dir: /var/ghost-blog
+ghost__blog_name: Ghost Blog
+ghost__host: localhost
+ghost__listen_host: 127.0.0.1
+ghost__listen_port: 2368
+ghost__configs: {}

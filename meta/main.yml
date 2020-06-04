@@ -1,0 +1,25 @@
+galaxy_info:
+  author: Santiago Alessandri
+  description: Setup a ghost blog using docker container
+
+  license: MIT
+
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+    - name: Archlinux
+      versions:
+        - all
+
+  galaxy_tags:
+    - web
+    - docker
+    - blog
+    - publishing
+    - cms
