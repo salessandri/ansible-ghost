@@ -21,7 +21,7 @@
 
 - name: "Setup ghost's docker container for {{ ghost__blog_name }}"
   docker_container:
-    name: 'ghost_{{ ghost__host | replace(".", "_") }}'
+    name: 'ghost_{{ ghost__host | regex_replace("[\.\/]", "_") }}'
     image: 'ghost:{{ ghost__version }}-alpine'
     env_file: "{{ ghost__base_dir }}/docker_env"
     mounts:
