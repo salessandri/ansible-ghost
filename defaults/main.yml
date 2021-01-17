@@ -1,5 +1,5 @@
 ---
-ghost__version: '3.40.2'
+ghost__version: '3.40.5'
 ghost__base_dir: /var/ghost-blog
 ghost__blog_name: Ghost Blog
 ghost__host: localhost
