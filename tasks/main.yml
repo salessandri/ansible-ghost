@@ -28,7 +28,7 @@
       - source: "{{ ghost__base_dir }}/content"
         target: /var/lib/ghost/content
         type: bind
-    networks_cli_compatible: yes
+    networks_cli_compatible: true
     published_ports:
       - "{{ ghost__listen_host }}:{{ ghost__listen_port }}:2368/tcp"
     restart_policy: 'unless-stopped'
