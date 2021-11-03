@@ -1,4 +1,5 @@
 galaxy_info:
+  namespace: salessandri
   role_name: ghost
   author: Santiago Alessandri
   description: Setup a ghost blog using docker container
