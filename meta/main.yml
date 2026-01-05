@@ -2,7 +2,7 @@ galaxy_info:
   namespace: salessandri
   role_name: ghost
   author: Santiago Alessandri
-  description: Setup a ghost blog using docker container
+  description: Setup a ghost blog using podman container
 
   license: MIT
 
@@ -18,7 +18,7 @@ galaxy_info:
 
   galaxy_tags:
     - web
-    - docker
+    - podman
     - blog
     - publishing
     - cms

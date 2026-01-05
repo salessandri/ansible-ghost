@@ -13,23 +13,20 @@
 
 - name: 'Creating config file for {{ ghost__blog_name }}'
   ansible.builtin.template:
-    src: "templates/docker_env.j2"
-    dest: "{{ ghost__base_dir }}/docker_env"
+    src: "templates/podman_env.j2"
+    dest: "{{ ghost__base_dir }}/podman_env"
     owner: root
     group: root
     mode: '600'
 
-- name: "Setup ghost's docker container for {{ ghost__blog_name }}"
-  community.docker.docker_container:
+- name: "Setup ghost's podman container for {{ ghost__blog_name }}"
+  containers.podman.podman_container:
     name: 'ghost_{{ ghost__host | regex_replace("[\.\/]", "_") }}'
-    image: 'ghost:{{ ghost__version }}-alpine'
-    env_file: "{{ ghost__base_dir }}/docker_env"
-    mounts:
-      - source: "{{ ghost__base_dir }}/content"
-        target: /var/lib/ghost/content
-        type: bind
-    networks_cli_compatible: true
-    published_ports:
+    image: 'docker.io/ghost:{{ ghost__version }}-alpine'
+    env_file: "{{ ghost__base_dir }}/podman_env"
+    mount:
+      - "type=bind,source={{ ghost__base_dir }}/content,destination=/var/lib/ghost/content"
+    ports:
       - "{{ ghost__listen_host }}:{{ ghost__listen_port }}:2368/tcp"
     restart_policy: 'unless-stopped'
     state: started
