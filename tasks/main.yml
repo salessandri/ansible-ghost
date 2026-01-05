@@ -10,26 +10,51 @@
   loop:
     - '{{ ghost__base_dir }}'
     - '{{ ghost__base_dir }}/content'
+    - '{{ ghost__base_dir }}/db'
 
 - name: 'Creating config file for {{ ghost__blog_name }}'
   ansible.builtin.template:
-    src: "templates/docker_env.j2"
-    dest: "{{ ghost__base_dir }}/docker_env"
+    src: "templates/podman_env.j2"
+    dest: "{{ ghost__base_dir }}/podman_env"
     owner: root
     group: root
     mode: '600'
+  register: ghost__register_podman_env
 
-- name: "Setup ghost's docker container for {{ ghost__blog_name }}"
-  community.docker.docker_container:
+- name: 'Creating network for {{ ghost__blog_name }}'
+  containers.podman.podman_network:
+    name: '{{ ghost__network_name }}'
+    subnet: '{{ ghost__network_cidr }}'
+    gateway: '{{ ghost__network_gateway }}'
+    state: present
+
+- name: "Setup ghost's mysql podman container for {{ ghost__blog_name }}"
+  containers.podman.podman_container:
+    name: 'ghost_db_{{ ghost__host | regex_replace("[\.\/]", "_") }}'
+    image: 'docker.io/library/mysql:{{ ghost__mysql_version }}'
+    network: '{{ ghost__network_name }}'
+    env:
+      MYSQL_ROOT_PASSWORD: '{{ ghost__mysql_root_password }}'
+      MYSQL_DATABASE: '{{ ghost__mysql_database }}'
+      MYSQL_USER: '{{ ghost__mysql_user }}'
+      MYSQL_PASSWORD: '{{ ghost__mysql_password }}'
+    mount:
+      - "type=bind,source={{ ghost__base_dir }}/db,destination=/var/lib/mysql"
+    restart_policy: 'unless-stopped'
+    state: started
+    command:
+      - '--collation-server=utf8mb4_0900_ai_ci'
+
+- name: "Setup ghost's podman container for {{ ghost__blog_name }}"
+  containers.podman.podman_container:
     name: 'ghost_{{ ghost__host | regex_replace("[\.\/]", "_") }}'
-    image: 'ghost:{{ ghost__version }}-alpine'
-    env_file: "{{ ghost__base_dir }}/docker_env"
-    mounts:
-      - source: "{{ ghost__base_dir }}/content"
-        target: /var/lib/ghost/content
-        type: bind
-    networks_cli_compatible: true
-    published_ports:
+    image: 'docker.io/ghost:{{ ghost__version }}-alpine'
+    env_file: "{{ ghost__base_dir }}/podman_env"
+    network: '{{ ghost__network_name }}'
+    mount:
+      - "type=bind,source={{ ghost__base_dir }}/content,destination=/var/lib/ghost/content"
+    ports:
       - "{{ ghost__listen_host }}:{{ ghost__listen_port }}:2368/tcp"
     restart_policy: 'unless-stopped'
     state: started
+    recreate: "{{ ghost__register_podman_env.changed | default(false) }}"
