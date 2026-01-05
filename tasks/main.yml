@@ -10,6 +10,7 @@
   loop:
     - '{{ ghost__base_dir }}'
     - '{{ ghost__base_dir }}/content'
+    - '{{ ghost__base_dir }}/db'
 
 - name: 'Creating config file for {{ ghost__blog_name }}'
   ansible.builtin.template:
@@ -19,11 +20,19 @@
     group: root
     mode: '600'
 
+- name: 'Creating network for {{ ghost__blog_name }}'
+  containers.podman.podman_network:
+    name: '{{ ghost__network_name }}'
+    subnet: '{{ ghost__network_cidr }}'
+    gateway: '{{ ghost__network_gateway }}'
+    state: present
+
 - name: "Setup ghost's podman container for {{ ghost__blog_name }}"
   containers.podman.podman_container:
     name: 'ghost_{{ ghost__host | regex_replace("[\.\/]", "_") }}'
     image: 'docker.io/ghost:{{ ghost__version }}-alpine'
     env_file: "{{ ghost__base_dir }}/podman_env"
+    network: '{{ ghost__network_name }}'
     mount:
       - "type=bind,source={{ ghost__base_dir }}/content,destination=/var/lib/ghost/content"
     ports:
