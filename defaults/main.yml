@@ -5,9 +5,12 @@ ghost__blog_name: Ghost Blog
 ghost__host: localhost
 ghost__listen_host: 127.0.0.1
 ghost__listen_port: 2368
-ghost__mysql_version: '8.4.7'
 ghost__configs: {}
 
 ghost__network_name: 'net_{{ ghost__host | regex_replace("[\.\/]", "_") }}'
 ghost__network_cidr: 172.21.0.0/29
 ghost__network_gateway: 172.21.0.1
+
+ghost__mysql_version: '8.4.7'
+ghost__mysql_user: ghost
+ghost__mysql_database: ghost

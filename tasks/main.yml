@@ -19,6 +19,7 @@
     owner: root
     group: root
     mode: '600'
+  register: ghost__register_podman_env
 
 - name: 'Creating network for {{ ghost__blog_name }}'
   containers.podman.podman_network:
@@ -26,6 +27,23 @@
     subnet: '{{ ghost__network_cidr }}'
     gateway: '{{ ghost__network_gateway }}'
     state: present
+
+- name: "Setup ghost's mysql podman container for {{ ghost__blog_name }}"
+  containers.podman.podman_container:
+    name: 'ghost_db_{{ ghost__host | regex_replace("[\.\/]", "_") }}'
+    image: 'docker.io/library/mysql:{{ ghost__mysql_version }}'
+    network: '{{ ghost__network_name }}'
+    env:
+      MYSQL_ROOT_PASSWORD: '{{ ghost__mysql_root_password }}'
+      MYSQL_DATABASE: '{{ ghost__mysql_database }}'
+      MYSQL_USER: '{{ ghost__mysql_user }}'
+      MYSQL_PASSWORD: '{{ ghost__mysql_password }}'
+    mount:
+      - "type=bind,source={{ ghost__base_dir }}/db,destination=/var/lib/mysql"
+    restart_policy: 'unless-stopped'
+    state: started
+    command:
+      - '--collation-server=utf8mb4_0900_ai_ci'
 
 - name: "Setup ghost's podman container for {{ ghost__blog_name }}"
   containers.podman.podman_container:
@@ -39,3 +57,4 @@
       - "{{ ghost__listen_host }}:{{ ghost__listen_port }}:2368/tcp"
     restart_policy: 'unless-stopped'
     state: started
+    recreate: "{{ ghost__register_podman_env.changed | default(false) }}"
