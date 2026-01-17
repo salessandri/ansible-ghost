@@ -40,7 +40,7 @@
       MYSQL_PASSWORD: '{{ ghost__mysql_password }}'
     mount:
       - "type=bind,source={{ ghost__base_dir }}/db,destination=/var/lib/mysql"
-    restart_policy: 'unless-stopped'
+    restart_policy: 'always'
     state: started
     command:
       - '--collation-server=utf8mb4_0900_ai_ci'
@@ -55,6 +55,6 @@
       - "type=bind,source={{ ghost__base_dir }}/content,destination=/var/lib/ghost/content"
     ports:
       - "{{ ghost__listen_host }}:{{ ghost__listen_port }}:2368/tcp"
-    restart_policy: 'unless-stopped'
+    restart_policy: 'always'
     state: started
     recreate: "{{ ghost__register_podman_env.changed | default(false) }}"
